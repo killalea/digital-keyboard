@@ -18,6 +18,8 @@ from db import db
 create_sound = Sound()
 mapping_db = db()
 
+# TODO: remove global keywords
+# TODO: remove needless returns
 pedal_pressed = False
 play_over = False
 mapping_notes = []
@@ -79,7 +81,7 @@ class DigitalInstrumentWidget(QGraphicsView):
     windowHeight = self.size().height()
     keyAreaBounds = QRect(0, 0, windowWidth * .85, windowHeight * 0.4)
 
-    # Reset Key Mappings Buttons
+    # Reset Key Mappings Button
     self.layout = QVBoxLayout()
     self.reset_button = QPushButton()
     self.reset_button.setText('Reset Mappings')
@@ -87,8 +89,32 @@ class DigitalInstrumentWidget(QGraphicsView):
     self.reset_button.show()
     self.reset_button.clicked.connect(self.resetButton)
     self.layout.addWidget(self.reset_button, 100, Qt.AlignCenter)
+
+    # Save Key Mappings Button
+    self.save_button = QPushButton()
+    self.save_button.setText('Save Mappings')
+    self.save_button.show()
+    self.save_button.clicked.connect(self.saveButton)
+    self.layout.addWidget(self.save_button, 110, Qt.AlignCenter)
+
+    # Load Key Mappings Button
+    self.load_button = QPushButton()
+    self.load_button.setText('Load Mappings')
+    self.load_button.show()
+    self.load_button.clicked.connect(self.loadButton)
+    self.layout.addWidget(self.load_button, 100, Qt.AlignCenter)
+
+    self.delete_button = QPushButton()
+    self.delete_button.setText('Delete Mappings')
+    self.delete_button.show()
+    self.delete_button.clicked.connect(self.deleteButton)
+    self.layout.addWidget(self.delete_button, 100, Qt.AlignCenter)
+
     self.layout.addSpacerItem(QSpacerItem(100, 500))
     self.setLayout(self.layout)
+
+
+
 
     #add chord mappings to gui
     self.chordMappings = QGraphicsTextItem("Chord Mappings:" + '\n' + "None")
@@ -452,12 +478,72 @@ class DigitalInstrumentWidget(QGraphicsView):
       self.updateUI()
 
   def resetButton(self):
-    global mapping_notes
     print("Reset Button Pressed")
-    self.customMapping = {}
-    mapping_notes = []
+    global mapping_notes
+    if mapping_notes:
+      mapping_notes = []
+    else:
+      self.customMapping = {}
     self.updateUI()
-    return
+
+  def saveButton(self):
+    print("Save Button Pressed")
+    if not self.customMapping:
+      return
+
+    # Save popup
+    dialog_output = QInputDialog().getText(self, 'Save Key Mapping', 'Enter key mapping name here')
+    mapping_name = dialog_output[0]
+    dialog_accepted = dialog_output[1]
+    if not (mapping_name and dialog_accepted):
+      print 'Save canceled'
+      return
+
+    save_mapping = []
+    for key, val in self.customMapping.iteritems():
+      for note in val:
+        save_mapping.append((mapping_name, key, note.value))
+
+    mapping_db.insert_mapping(save_mapping)
+    print('New mapping saved:\n{0}'.format(save_mapping))
+
+
+  def loadButton(self):
+    print("Load Button Pressed")
+    mapping_names = mapping_db.get_all_mapping_names()
+    dropdown_options = [' - '] + [i[0] for i in mapping_names]
+
+    dialog_output = QInputDialog().getItem(self, 'Load Key Mapping',
+        'Select key mapping', dropdown_options)
+    mname = dialog_output[0]
+    dialog_accepted = dialog_output[1]
+    if mname == ' - ' or not dialog_accepted:
+      print 'Load canceled'
+
+    loaded_mapping = mapping_db.get_mapping_from_name(mname)
+    print loaded_mapping
+    for maps in loaded_mapping:
+      if maps[0] in self.customMapping:
+        self.customMapping[maps[0]].append(DiscreteNotes(maps[1]))
+      else:
+        self.customMapping[maps[0]] = [DiscreteNotes(maps[1])]
+
+    self.updateUI()
+
+  def deleteButton(self):
+    print("Delete Button Pressed")
+    mapping_names = mapping_db.get_all_mapping_names()
+    dropdown_options = [' - '] + [i[0] for i in mapping_names]
+
+    dialog_output = QInputDialog().getItem(self, 'Delete Saved Key Mapping',
+        'Delete key mapping (PERMANENT)', dropdown_options)
+    mname = dialog_output[0]
+    dialog_accepted = dialog_output[1]
+    if mname == ' - ' or not dialog_accepted:
+      print 'Delete canceled'
+
+    mapping_db.delete_mapping_from_name(mname)
+
 
 def main():
   fluidsynth.init("HS Synth Collection I.sf2", "alsa")

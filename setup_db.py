@@ -4,7 +4,8 @@ create_table_mappings = '''
 CREATE TABLE mappings (
   mname VARCHAR(255) NOT NULL,
   key INTEGER NOT NULL,
-  note INTEGER NOT NULL
+  note INTEGER NOT NULL,
+  CONSTRAINT no_duplicates UNIQUE (mname, key, note)
 )
 '''
 

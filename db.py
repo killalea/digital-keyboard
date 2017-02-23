@@ -14,8 +14,13 @@ SELECT key, note FROM mappings
 WHERE mname = "{0}"
 '''
 
+delete_mapping_from_name_query = '''
+DELETE FROM mappings
+WHERE mname = "{0}"
+'''
+
 insert_mapping_query = '''
-INSERT INTO mappings VALUES(?, ?, ?)
+INSERT OR IGNORE INTO mappings VALUES(?, ?, ?)
 '''
 
 
@@ -23,7 +28,7 @@ class db(object):
 	def __init__(self):
 		super(db, self).__init__()
 
-		self.conn = sqlite3.connect('digital-keyboard.db')
+		self.conn = sqlite3.connect('mappings.db')
 		atexit.register(self.close_connection)
 		self.c = self.conn.cursor()
 
@@ -39,11 +44,17 @@ class db(object):
 		self.c.execute(get_all_mapping_names_query)
 		return self.c.fetchall()
 
-	def get_mapping_from_name(self):
-		self.c.execute(get_mapping_from_name_query)
+	def get_mapping_from_name(self, mname):
+		self.c.execute(get_mapping_from_name_query.format(mname))
 		return self.c.fetchall()
 
-	def insert_mapping_query(self, mapping, num_notes):
+	def delete_mapping_from_name(self, mname):
+		self.c.execute(delete_mapping_from_name_query.format(mname))
+		return self.c.fetchall()
+
+	def insert_mapping(self, mapping):
+		if not mapping:
+			return
 		self.c.executemany(insert_mapping_query, mapping)
 		self.conn.commit()
 
