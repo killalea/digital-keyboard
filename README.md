@@ -19,6 +19,8 @@ Get audio priveleges:
 
 Credit where it's due, the audio privilege part comes from here: https://ubuntuforums.org/archive/index.php/t-1637399.html
 
+To run
+* `python digital-keyboard.py`
 
 ## Our roots
 
