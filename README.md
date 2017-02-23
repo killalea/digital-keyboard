@@ -5,17 +5,19 @@ Welcome to the Digital Keyboard project! We are focused on allowing people with 
 
 ## Instructions to run source on linux
 
-* Clone our git repository
-* Run our requirements document: `pip install -r requirements.txt`
+Install dependencies:
+* Clone our repo: `git clone https://github.com/killalea/digital-keyboard.git`
+* Be sure you are running Python 2.7
+* Install python requirements: `pip install -r requirements.txt`
 * Install pyqt: `sudo apt-get install python-pyqt5`
-* Run the following commands from this source: https://ubuntuforums.org/archive/index.php/t-1637399.html
 
-`whoami`
-That will output your username
-`sudo adduser [your username] audio`
-Then you have to reboot
-Check that you have proper privileges:
-`ulimit -r -l`
+Get audio priveleges:
+* Output your username: `whoami`
+* Give your user audo privileges `sudo adduser [your username] audio`
+* Then you have to reboot
+* Check that you have proper privileges: `ulimit -r -l`
+
+Credit where it's due, the audio privilege part comes from here: https://ubuntuforums.org/archive/index.php/t-1637399.html
 
 
 ## Our roots
