@@ -10,6 +10,7 @@ Install dependencies:
 * Be sure you are running Python 2.7
 * Install python requirements: `pip install -r requirements.txt`
 * Install pyqt: `sudo apt-get install python-pyqt5`
+* To set up database `python setup_db.py`
 
 Get audio priveleges:
 * Output your username: `whoami`
