@@ -12,14 +12,14 @@ import sys
 from random import random
 from pygame import key
 from enum import Enum
-from Sound import Sound
+from sound import Sound
+from db import db
 
 create_sound = Sound()
+mapping_db = db()
 
 pedal_pressed = False
-
 play_over = False
-
 mapping_notes = []
 
 
