@@ -9,22 +9,6 @@ CREATE TABLE IF NOT EXISTS mappings (
 )
 '''
 
-# TODO: split this table up in traditional relational style
-# create_table_mappings = '''
-# CREATE TABLE mappings (
-#   mname VARCHAR(255) PRIMARY KEY,
-#   key INTEGER NOT NULL
-# )
-# '''
-
-# create_table_note_mappings = '''
-# CREATE TABLE note_mappings (
-#   mname VARCHAR(255),
-#   note INTEGER NOT NULL,
-#   FOREIGN KEY (mname) REFERENCES mappings(mname)
-# )
-# '''
-
 heartandsoul = [
 	('heartandsoul', 39, 12),
 	('heartandsoul', 39, 16),
@@ -49,4 +33,5 @@ class Mapping(object):
   c = conn.cursor()
   c.execute(create_table_mappings)
   c.executemany(default_mapping_insert_query, heartandsoul)
+  conn.commit()
   conn.close()

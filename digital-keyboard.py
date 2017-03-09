@@ -24,7 +24,6 @@ pedal_pressed = False
 play_over = False
 mapping_notes = []
 
-
 class PianoKeyItem(QGraphicsRectItem):
   def mousePressEvent(self, event):
     if hasattr(self, 'note') and self.note is not None:
@@ -61,12 +60,68 @@ class DiscreteNotes(Enum):
   As1  = 22
   B1   = 23
 
+selected_keyboard = 'asdf keyboard'
+
+keyboard_types = {
+  'asdf keyboard': {
+    Qt.Key_Z: DiscreteNotes.C0,
+    Qt.Key_X: DiscreteNotes.D0,
+    Qt.Key_C: DiscreteNotes.E0,
+    Qt.Key_A: DiscreteNotes.F0,
+    Qt.Key_S: DiscreteNotes.G0,
+    Qt.Key_D: DiscreteNotes.A0,
+    Qt.Key_F: DiscreteNotes.B0,
+    Qt.Key_Q: DiscreteNotes.Cs0,
+    Qt.Key_W: DiscreteNotes.Ds0,
+    Qt.Key_E: DiscreteNotes.Fs0,
+    Qt.Key_R: DiscreteNotes.Gs0,
+    Qt.Key_T: DiscreteNotes.As0,
+    Qt.Key_B: DiscreteNotes.C1,
+    Qt.Key_N: DiscreteNotes.D1,
+    Qt.Key_M: DiscreteNotes.E1,
+    Qt.Key_H: DiscreteNotes.F1,
+    Qt.Key_J: DiscreteNotes.G1,
+    Qt.Key_K: DiscreteNotes.A1,
+    Qt.Key_L: DiscreteNotes.B1,
+    Qt.Key_Y: DiscreteNotes.Cs1,
+    Qt.Key_U: DiscreteNotes.Ds1,
+    Qt.Key_I: DiscreteNotes.Fs1,
+    Qt.Key_O: DiscreteNotes.Gs1,
+    Qt.Key_P: DiscreteNotes.As1,
+  },
+  'bat keyboard': {
+    Qt.Key_F: DiscreteNotes.C0,
+    Qt.Key_G: DiscreteNotes.D0,
+    Qt.Key_C: DiscreteNotes.E0,
+    Qt.Key_I: DiscreteNotes.F0,
+    Qt.Key_V: DiscreteNotes.G0,
+    Qt.Key_A: DiscreteNotes.A0,
+    Qt.Key_D: DiscreteNotes.B0,
+    Qt.Key_Q: DiscreteNotes.Cs0,
+    Qt.Key_W: DiscreteNotes.Ds0,
+    Qt.Key_E: DiscreteNotes.Fs0,
+    Qt.Key_R: DiscreteNotes.Gs0,
+    Qt.Key_T: DiscreteNotes.As0,
+    Qt.Key_B: DiscreteNotes.C1,
+    Qt.Key_N: DiscreteNotes.D1,
+    Qt.Key_M: DiscreteNotes.E1,
+    Qt.Key_H: DiscreteNotes.F1,
+    Qt.Key_J: DiscreteNotes.G1,
+    Qt.Key_K: DiscreteNotes.A1,
+    Qt.Key_L: DiscreteNotes.B1,
+    Qt.Key_Y: DiscreteNotes.Cs1,
+    Qt.Key_U: DiscreteNotes.Ds1,
+    Qt.Key_S: DiscreteNotes.Fs1,
+    Qt.Key_O: DiscreteNotes.Gs1,
+    Qt.Key_P: DiscreteNotes.As1,
+  },
+}
 
 class DigitalInstrumentWidget(QGraphicsView):
 
   def __init__(self):
     super(DigitalInstrumentWidget, self).__init__()
-    self.initInsturment()
+    self.initInstrument()
     self.initUI()
 
   def initUI(self):
@@ -81,8 +136,16 @@ class DigitalInstrumentWidget(QGraphicsView):
     windowHeight = self.size().height()
     keyAreaBounds = QRect(0, 0, windowWidth * .85, windowHeight * 0.4)
 
-    # Reset Key Mappings Button
     self.layout = QVBoxLayout()
+
+    # Default Keyboard Button
+    self.default_button = QPushButton()
+    self.default_button.setText('Set Keyboard Type')
+    self.default_button.show()
+    self.default_button.clicked.connect(self.defaultButton)
+    self.layout.addWidget(self.default_button, 100, Qt.AlignCenter)
+
+    # Reset Key Mappings Button
     self.reset_button = QPushButton()
     self.reset_button.setText('Reset Mappings')
     #QShortcut(QKeySequence(Qt.Key_AsciiTilde), self.reset_button, self.resetButton())
@@ -95,7 +158,7 @@ class DigitalInstrumentWidget(QGraphicsView):
     self.save_button.setText('Save Mappings')
     self.save_button.show()
     self.save_button.clicked.connect(self.saveButton)
-    self.layout.addWidget(self.save_button, 110, Qt.AlignCenter)
+    self.layout.addWidget(self.save_button, 100, Qt.AlignCenter)
 
     # Load Key Mappings Button
     self.load_button = QPushButton()
@@ -117,7 +180,7 @@ class DigitalInstrumentWidget(QGraphicsView):
 
 
     #add chord mappings to gui
-    self.chordMappings = QGraphicsTextItem("Chord Mappings:" + '\n' + "None")
+    self.chordMappings = QGraphicsTextItem("Key Mappings:" + '\n' + "None")
     self.chordMappings.setZValue(100)
     self.chordMappings.setPos(0, -300)
     self.chordMappings.adjustSize()
@@ -199,7 +262,7 @@ class DigitalInstrumentWidget(QGraphicsView):
     if not hasattr(self, 'pressedKeys') or self.pressedKeys is None:
       self.pressedKeys = [False] * 24
 
-    chordMapString = "Chord Mappings:" + '\n'
+    chordMapString = "Key Mappings:" + '\n'
 
     if self.customMapping:
       for key in self.customMapping:
@@ -221,8 +284,9 @@ class DigitalInstrumentWidget(QGraphicsView):
     self.octaveRight.setPlainText("Octave: " + str(self.octave + 1))
 
     keyMappings = {}
-    for k in self.noteDict:
-      keyMappings[self.noteDict[k]] = k
+    for key, val in self.noteDict.iteritems():
+      print key
+      keyMappings[val] = key
 
     # Update color of white keys (pressed or not)
     whiteKeyIndices = [0, 2, 4, 5, 7, 9, 11, 12, 14, 16, 17, 19, 21, 22]
@@ -273,38 +337,13 @@ class DigitalInstrumentWidget(QGraphicsView):
     self.scene().update(self.scene().sceneRect())
 
 
-  def initInsturment(self):
+  def initInstrument(self):
     #init octave to 0
     self.octave = 1;
 
     #keys A-K map to notes G-F
     #keys W, E and T-U map to notes C#-A#
-    self.noteDict = {
-      Qt.Key_Z: DiscreteNotes.C0,
-      Qt.Key_X: DiscreteNotes.D0,
-      Qt.Key_C: DiscreteNotes.E0,
-      Qt.Key_A: DiscreteNotes.F0,
-      Qt.Key_S: DiscreteNotes.G0,
-      Qt.Key_D: DiscreteNotes.A0,
-      Qt.Key_F: DiscreteNotes.B0,
-      Qt.Key_Q: DiscreteNotes.Cs0,
-      Qt.Key_W: DiscreteNotes.Ds0,
-      Qt.Key_E: DiscreteNotes.Fs0,
-      Qt.Key_R: DiscreteNotes.Gs0,
-      Qt.Key_T: DiscreteNotes.As0,
-      Qt.Key_B: DiscreteNotes.C1,
-      Qt.Key_N: DiscreteNotes.D1,
-      Qt.Key_M: DiscreteNotes.E1,
-      Qt.Key_H: DiscreteNotes.F1,
-      Qt.Key_J: DiscreteNotes.G1,
-      Qt.Key_K: DiscreteNotes.A1,
-      Qt.Key_L: DiscreteNotes.B1,
-      Qt.Key_Y: DiscreteNotes.Cs1,
-      Qt.Key_U: DiscreteNotes.Ds1,
-      Qt.Key_I: DiscreteNotes.Fs1,
-      Qt.Key_O: DiscreteNotes.Gs1,
-      Qt.Key_P: DiscreteNotes.As1,
-    }
+    self.noteDict = keyboard_types[selected_keyboard]
 
     #init octave dict to map to the number keys
     #key up and down are special cases caught by updateOctave
@@ -450,7 +489,7 @@ class DigitalInstrumentWidget(QGraphicsView):
 
     #if key is mapped to a note, start the note
     for note in notes:
-      print 'Prinring notes:' + str(note)
+      print 'Printing notes:' + str(note)
       self.startNote(note)
 
       # Mark the key as pressed for the UI
@@ -476,6 +515,21 @@ class DigitalInstrumentWidget(QGraphicsView):
       # Mark the key as released for the UI
       self.pressedKeys[note.value] = False
       self.updateUI()
+
+  def defaultButton(self):
+    print("Default button pressed")
+    dialog_output = QInputDialog().getItem(self, 'Select Keyboard Type',
+        '', keyboard_types.keys())
+
+    keyboard_name = dialog_output[0]
+    dialog_accepted = dialog_output[1]
+    if not (keyboard_name and dialog_accepted):
+      print 'Keyboard change canceled'
+      return
+
+    self.noteDict = keyboard_types[keyboard_name]
+    self.updateUI()
+
 
   def resetButton(self):
     print("Reset Button Pressed")

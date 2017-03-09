@@ -50,7 +50,7 @@ class db(object):
 
 	def delete_mapping_from_name(self, mname):
 		self.c.execute(delete_mapping_from_name_query.format(mname))
-		return self.c.fetchall()
+		self.conn.commit()
 
 	def insert_mapping(self, mapping):
 		if not mapping:
