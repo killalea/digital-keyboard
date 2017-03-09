@@ -285,7 +285,6 @@ class DigitalInstrumentWidget(QGraphicsView):
 
     keyMappings = {}
     for key, val in self.noteDict.iteritems():
-      print key
       keyMappings[val] = key
 
     # Update color of white keys (pressed or not)
