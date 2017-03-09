@@ -20,8 +20,26 @@ Get audio priveleges:
 
 Credit where it's due, the audio privilege part comes from here: https://ubuntuforums.org/archive/index.php/t-1637399.html
 
+## Usage
+
 To run
 * `python digital-keyboard.py`
+
+To create a note mapping
+* Click a key, or multiple keys (if you press reset when they're highlighted, it will clear)
+* Press the key you would like to map them to
+* Press reset to clear mappings
+* Press save to save mappings
+
+To load a previously saved or built in mapping, press the load button. The delete button works similarly.
+
+We automatically support "asfd" and BAT keyboards. To select your keyboard, use the keyboard type button.
+
+Other functions:
+* The number keys and arrows switch octaves
+* The space key functions as the sustain peddle
+* The tab key will kill the peddle
+* Pres the escape key to quit
 
 ## Our roots
 
