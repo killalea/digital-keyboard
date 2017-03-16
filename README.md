@@ -40,7 +40,7 @@ Other functions:
 * The number keys and arrows switch octaves
 * The space key functions as the sustain peddle
 * The tab key will kill the peddle
-* Pres the escape key to quit
+* Press the escape key to quit
 
 ## Our roots
 
