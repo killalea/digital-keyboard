@@ -2,6 +2,7 @@
 
 Welcome to the Digital Keyboard project! We are focused on allowing people with physical limitations to play music on a digital keyboard using universal design principles.
 
+[Digital Keyboard](static/digital_keyboard_screenshot.png)
 
 ## Instructions to run source on linux
 

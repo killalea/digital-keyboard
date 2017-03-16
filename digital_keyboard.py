@@ -231,7 +231,7 @@ class DigitalInstrumentWidget(QGraphicsView):
     def initUI(self):
         self.resize(800, 500)
         self.move(100, 100)
-        self.setWindowTitle('EECS 481 Digital Instrument')
+        self.setWindowTitle('Digital Keyboard')
         self.show()
 
         # Set up graphics stuff
