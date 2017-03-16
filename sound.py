@@ -44,19 +44,3 @@ class Sound(object):
 
         del self.playing_notes[:]
         return
-
-    #def note_decay(self, note_enum):
-    #  time.sleep(3)
-    #  stop = 0
-    #  play = self.convert_note(note_enum)
-    #  for note in self.playing_notes:
-    #    if play == note:
-    #      stop = note
-    #      self.playing_notes.remove(note)
-    #      break
-
-    #  fluidsynth.stop_Note(stop, 1)
-    #  return
-
-Sound()
-

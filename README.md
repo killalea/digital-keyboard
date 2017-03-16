@@ -23,7 +23,7 @@ Credit where it's due, the audio privilege part comes from here: https://ubuntuf
 ## Usage
 
 To run
-* `python digital-keyboard.py`
+* `python digital_keyboard.py`
 
 To create a note mapping
 * Click a key, or multiple keys (if you press reset when they're highlighted, it will clear)
