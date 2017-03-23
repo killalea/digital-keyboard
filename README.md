@@ -19,8 +19,6 @@ Get audio priveleges:
 * Then you have to reboot
 * Check that you have proper privileges: `ulimit -r -l`
 
-Credit where it's due, the audio privilege part comes from here: https://ubuntuforums.org/archive/index.php/t-1637399.html
-
 ## Usage
 
 To run
@@ -46,4 +44,10 @@ Other functions:
 
 This project is built off of this repository: https://github.com/kosterjo/eecs481DigitalInsturment and was originally developed by:
 Brendan Killalea (Me), John Koster, Brian Lim, and Thomas Finch. 
+
+### Useful resources
+
+* Used to make sound: http://bspaans.github.io/python-mingus/
+* Used to pick out colorblind friendly colors: http://colorbrewer2.org/#type=diverging&scheme=RdGy&n=3
+* Used to set up audio privileges: https://ubuntuforums.org/archive/index.php/t-1637399.html
 
