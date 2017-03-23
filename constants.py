@@ -96,3 +96,5 @@ keyboard_types = {
         Qt.Key_P: DiscreteNotes.As1,
     },
 }
+
+highlighted_key_color = 0xef8a62

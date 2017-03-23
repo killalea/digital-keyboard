@@ -1,7 +1,7 @@
 from PyQt5.QtWidgets import QApplication, QGraphicsRectItem, QGraphicsView, QGraphicsScene
 from PyQt5.QtWidgets import QGraphicsTextItem, QVBoxLayout, QPushButton, QSpacerItem, QInputDialog
 from PyQt5.QtCore import Qt, QRect
-from PyQt5.QtGui import QKeySequence
+from PyQt5.QtGui import QKeySequence, QColor
 
 import constants
 from keyboard import Keyboard
@@ -167,7 +167,7 @@ class DigitalInstrumentWidget(QGraphicsView):
             key = keys[i]
             curNote = key.note
             if curNote in self.keyboard.mapping_notes:
-                key.setBrush(Qt.blue)
+                key.setBrush(QColor(constants.highlighted_key_color))
             else:
                 if self.pressedKeys[keyIndices[i]]:
                     key.setBrush(Qt.gray)
