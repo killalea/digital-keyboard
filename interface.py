@@ -189,7 +189,8 @@ class DigitalInstrumentWidget(QGraphicsView):
             key.mappingLabel.setPlainText(QKeySequence(keyMappings[note]).toString())
             for k, v in self.keyboard.customMapping.iteritems():
                 if str(note) in str(v):
-                    key.mappingLabel.setPlainText(QKeySequence(k).toString())
+                	# TODO: set text to new mapping when button pressed
+                    # key.mappingLabel.setPlainText(QKeySequence(k).toString())
                     break
                 elif keyMappings[note] == k:
                     key.mappingLabel.setPlainText("")
