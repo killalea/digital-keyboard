@@ -6,11 +6,11 @@ from sound import Sound
 from db import db
 
 class Keyboard(object):
-    def __init__(self):
+    def __init__(self, shortcutMappings):
         # self.DigitalInstrumentWidget = DigitalInstrumentWidget()
         self.sound = Sound()
         self.mapping_db = db()
-        self.initKeyboard()
+        self.initKeyboard(shortcutMappings)
 
         self.octave = 1;
         self.noteDict = constants.keyboard_types[constants.selected_keyboard]
@@ -18,11 +18,16 @@ class Keyboard(object):
         self.play_over = False
         self.mapping_notes = []
 
-    def initKeyboard(self):
+    def initKeyboard(self, shortcutMappings):
         # Contains override keys that will be hit first
         self.utilsDict = {
-            Qt.Key_Escape: QCoreApplication.instance().quit
+            Qt.Key_Escape: QCoreApplication.instance().quit,
+            Qt.Key_Control: lambda *args: -1,
         }
+
+        # Contains keyboard shortcuts; ctrl+listed key
+        # This must be initialized in interface.py so we can open interface dialogs
+        self.shortcutDict = shortcutMappings
 
         self.customMapping = {}
 
@@ -76,12 +81,21 @@ class Keyboard(object):
 
         return notes
 
-    def commandMapper(self, key):
+    def commandMapper(self, key, modifier):
+        """Maps pressed keys to commands
+        returns true to update UI and stop there
+        returns false to play note and not immediatly update UI
+        returns -1 to not update UI
+        """
+
         # if key is in the utility dictionary
         # call function mapped to that key
         if key in self.utilsDict:
-            self.utilsDict[key]()
-            return True
+            return self.utilsDict[key]()
+
+        elif modifier == Qt.ControlModifier and key in self.shortcutDict:
+            self.shortcutDict[key]()
+            return -1
 
         # if key pressed is mapped to an octave,
         # change current octave to that key

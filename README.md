@@ -39,6 +39,11 @@ Other functions:
 * The space key functions as the sustain peddle
 * The tab key will kill the peddle
 * Press the escape key to quit
+* ctrl+t opens change keyboard type dialog
+* ctrl+r resets key mappings
+* ctrl+s opens save key mappings dialog
+* ctrl+o or ctrl+l opens load saved key mappings dialog
+* ctrl+d opens delete key mappings dialog
 
 ## Our roots
 

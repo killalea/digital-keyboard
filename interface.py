@@ -21,8 +21,18 @@ class DigitalInstrumentWidget(QGraphicsView):
     def __init__(self):
         super(DigitalInstrumentWidget, self).__init__()
 
-        self.keyboard = Keyboard()
+        self.keyboard = Keyboard(self.getShortcutMappings())
         self.initUI()
+
+    def getShortcutMappings(self):
+    	return {
+    		Qt.Key_T: self.keyboardTypeButtonEvent,
+    		Qt.Key_R: self.resetButtonEvent,
+    		Qt.Key_S: self.saveButtonEvent,
+    		Qt.Key_O: self.loadButtonEvent,
+    		Qt.Key_L: self.loadButtonEvent,
+    		Qt.Key_D: self.deleteButtonEvent,
+    	}
 
     def createButton(self, text, event):
         button = QPushButton()
@@ -206,10 +216,14 @@ class DigitalInstrumentWidget(QGraphicsView):
 
         #if the key pressed is a command, return
         #command mapper takes care of the command's actions
-        if self.keyboard.commandMapper(event.key()):
+        res = self.keyboard.commandMapper(event.key(), event.modifiers())
+        if res:
             # TODO: only used for updateOctave(), refactor
             self.updateUI()
             return
+
+        elif res == -1:
+        	return
 
         #note mapper maps a key to a note
         #returns false if key is not maped to a note
