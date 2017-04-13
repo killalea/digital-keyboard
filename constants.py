@@ -97,4 +97,5 @@ keyboard_types = {
     },
 }
 
-highlighted_key_color = 0xef8a62
+orange = 0xef8a62
+highlighted_key_color = orange

@@ -1,5 +1,4 @@
-from PyQt5.QtWidgets import QApplication, QGraphicsRectItem, QGraphicsView, QGraphicsScene
-from PyQt5.QtWidgets import QGraphicsTextItem, QVBoxLayout, QPushButton, QSpacerItem, QInputDialog
+from PyQt5.QtWidgets import *
 from PyQt5.QtCore import Qt, QRect
 from PyQt5.QtGui import QKeySequence, QColor
 
@@ -39,11 +38,9 @@ class DigitalInstrumentWidget(QGraphicsView):
         button.setText(text)
         button.show()
         button.clicked.connect(event)
-        self.layout.addWidget(button, 100, Qt.AlignCenter)
+        self.boxLayout.addWidget(button, 100, Qt.AlignCenter)
 
     def initButtons(self):
-        self.layout = QVBoxLayout()
-
         button_text_events = [
             ('Set Keyboard Type', self.keyboardTypeButtonEvent),
             ('Reset Mappings', self.resetButtonEvent),
@@ -55,8 +52,43 @@ class DigitalInstrumentWidget(QGraphicsView):
         for text, event in button_text_events:
             self.createButton(text, event)
 
-        self.layout.addSpacerItem(QSpacerItem(100, 500))
-        self.setLayout(self.layout)
+        # TODO: rename boxLayout
+        self.boxLayout.addSpacerItem(QSpacerItem(100, 500))
+        # self.setLayout(self.boxLayout)
+
+        # TODO: hook up to event and use createButton function
+        self.settingsLayout = QVBoxLayout()
+        # new layouts and buttons:
+        button = QPushButton()
+        button.setText('Settings')
+        button.show()
+        button.clicked.connect(self.settingsButtonEvent)
+        self.settingsLayout.addWidget(button, 100, Qt.AlignCenter)
+        self.settingsLayout.addSpacerItem(QSpacerItem(100, 600))
+
+    def initMappingLayout(self):
+    	self.leftLayout = QVBoxLayout()
+        self.mappingsLayout = QGridLayout()
+        self.leftLayout.addLayout(self.mappingsLayout)
+        self.leftLayout.addSpacerItem(QSpacerItem(100, 500))
+        # new layouts and buttons:
+        label = QLabel()
+        label.setText('Key Mappings:')
+        label.show()
+        self.mappingsLayout.addWidget(label, 0, 0)
+
+        self.layout.addLayout(self.leftLayout,0,0)
+
+
+        # label = QLabel()
+        # label.setText('k: ')
+        # label.show()
+        # self.mappingsLayout.addWidget(label, 1, 0)
+        # button = QPushButton()
+        # button.setText('A, B')
+        # button.show()
+        # # button.clicked.connect(event)
+        # self.mappingsLayout.addWidget(button, 1, 1)
 
     def createTextItem(self, scene, text, x, y):
         text_item = QGraphicsTextItem(text)
@@ -69,6 +101,7 @@ class DigitalInstrumentWidget(QGraphicsView):
     def initText(self, scene):
         self.chordMappings = self.createTextItem(
                 scene, "Key Mappings:" + '\n' + "None", 0, -300)
+        self.chordMappings.setVisible(False)
         self.octaveLeft = self.createTextItem(
                 scene, "Octave: " + str(self.keyboard.octave), 150, -30)
         self.octaveRight = self.createTextItem(
@@ -137,7 +170,27 @@ class DigitalInstrumentWidget(QGraphicsView):
         # Set up graphics stuff
         scene = QGraphicsScene()
 
+        self.layout = QGridLayout()
+
+        self.boxLayout = QVBoxLayout()
+
         self.initButtons()
+
+        self.initMappingLayout()
+
+
+        # self.layout.addLayout(self.boxLayout,0,2)
+        self.layout.addLayout(self.boxLayout,0,1)
+        # self.layout.addLayout(self.leftLayout,0,0)
+        self.layout.addLayout(self.settingsLayout,0,2)
+        # self.layout.addWidget(scroll, 0,0)
+        # self.layout.addWidget(QPushButton("asdf"), 1,0)
+        button = QPushButton("asdf")
+        button.setVisible(False)
+        self.layout.addWidget(button, 0,2)
+        # self.layout.addWidget(QPushButton("asdf"), 1,3)
+        self.setLayout(self.layout)
+
         self.initText(scene)
         
         self.keyAreaBounds = QRect(0, 0, windowWidth * .85, windowHeight * 0.4)
@@ -152,7 +205,63 @@ class DigitalInstrumentWidget(QGraphicsView):
         self.setScene(scene)
         self.updateUI()
 
+    def updateMappingLayout(self):
+    	# TODO: remove old buttons/lables
+
+        customMapping = self.keyboard.customMapping
+        # mappingList = []
+        # buttons = []
+        # labels = []
+
+        if customMapping:
+        	i = 0
+        	for key in customMapping:
+        		i = i + 1
+        		labelText = QKeySequence(key).toString()
+        		buttonStrings = []
+        		for note in customMapping[key]:
+        			buttonStrings.append(note.name)
+				buttonText = ', '.join(buttonStrings)
+
+				label = QLabel()
+				label.setText(labelText)
+				label.show()
+				self.mappingsLayout.addWidget(label, i, 1)
+				button = QPushButton()
+				button.setText(buttonText)
+				button.show()
+				event = MappingButtonEvent(labelText, customMapping[key])
+				button.clicked.connect(event.event)
+				# button.setEnabled(False)
+				self.mappingsLayout.addWidget(button, i, 2)
+
+			# widgets = (self.mappingsLayout.itemAt(i) for i in range(self.mappingsLayout.count()))
+			# # for w in self.mappingsLayout.children():
+			# for w in widgets:
+			# 	# print '\n\nKIDSS'
+			# 	self.mappingsLayout.removeItem(w)
+			# 	if isinstance(w, QLabel):
+			# 		print '\n\n\nwoooooo!!!'
+				# else:
+					# print '\n\n nooo...'
+				# help (w.widget)
+				# help(w)
+				# break
+
+			# print 'buttons:'
+			# print buttons
+			# print mappingList
+			# self.leftLayout.hide()
+			# help(QVBoxLayout())
+
+			# self.initMappingLayout()
+			# self.layout.removeItem(self.leftLayout)
+
+
+
+
     def getChordMappingString(self):
+    	# TODO: delete all this trash
         chordMappingString = "Key Mappings:" + '\n'
 
         customMapping = self.keyboard.customMapping
@@ -201,6 +310,7 @@ class DigitalInstrumentWidget(QGraphicsView):
             self.pressedKeys = [False] * 24
 
         self.chordMappings.setPlainText(self.getChordMappingString())
+        self.updateMappingLayout()
 
         #update octaves seen on screen
         self.octaveLeft.setPlainText("Octave: " + str(self.keyboard.octave))
@@ -293,3 +403,23 @@ class DigitalInstrumentWidget(QGraphicsView):
                 'Delete key mapping (PERMANENT)', dropdown_options)
 
         self.keyboard.deleteButton(dialog_output)
+
+    def settingsButtonEvent(self):
+    	dropdown_options = ['orange', 'blue'];
+    	colors = {
+    		'back&white': constants.orange,
+    		'blue': Qt.blue,
+    	}
+    	dialog_output = QInputDialog().getItem(self, 'Settings',
+                'Choose a colorshceme', dropdown_options)
+    	constants.highlighted_key_color = colors[dialog_output[0]]
+
+class MappingButtonEvent(DigitalInstrumentWidget):
+	def __init__(self, key, notes):
+		self.key = key
+		self.notes = notes
+
+	def event(self):
+		print 'Hit event\n\n'
+		dialog_output = QInputDialog().getItem(self, 'Mapping Button',
+                key, notes)
