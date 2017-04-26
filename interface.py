@@ -2,6 +2,8 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtCore import Qt, QRect
 from PyQt5.QtGui import QKeySequence, QColor
 
+from functools import partial
+
 import constants
 from keyboard import Keyboard
 
@@ -52,11 +54,8 @@ class DigitalInstrumentWidget(QGraphicsView):
         for text, event in button_text_events:
             self.createButton(text, event)
 
-        # TODO: rename boxLayout
         self.boxLayout.addSpacerItem(QSpacerItem(100, 500))
-        # self.setLayout(self.boxLayout)
 
-        # TODO: hook up to event and use createButton function
         self.settingsLayout = QVBoxLayout()
         # new layouts and buttons:
         button = QPushButton()
@@ -67,6 +66,10 @@ class DigitalInstrumentWidget(QGraphicsView):
         self.settingsLayout.addSpacerItem(QSpacerItem(100, 600))
 
     def initMappingLayout(self):
+    	self.mappingButtonList = []
+    	self.mappingLabelList = []
+    	self.playingMappingButtonNotes = []
+
     	self.leftLayout = QVBoxLayout()
         self.mappingsLayout = QGridLayout()
         self.leftLayout.addLayout(self.mappingsLayout)
@@ -78,17 +81,6 @@ class DigitalInstrumentWidget(QGraphicsView):
         self.mappingsLayout.addWidget(label, 0, 0)
 
         self.layout.addLayout(self.leftLayout,0,0)
-
-
-        # label = QLabel()
-        # label.setText('k: ')
-        # label.show()
-        # self.mappingsLayout.addWidget(label, 1, 0)
-        # button = QPushButton()
-        # button.setText('A, B')
-        # button.show()
-        # # button.clicked.connect(event)
-        # self.mappingsLayout.addWidget(button, 1, 1)
 
     def createTextItem(self, scene, text, x, y):
         text_item = QGraphicsTextItem(text)
@@ -147,6 +139,9 @@ class DigitalInstrumentWidget(QGraphicsView):
             key.instrument_widget = self
             key.note = constants.DiscreteNotes(keyIndices[i])
 
+            font = key.mappingLabel.font()
+            font.setBold(True)
+            key.mappingLabel.setFont(font)
             key.mappingLabel.setZValue(100)
             key.mappingLabel.setPlainText('A')
             key.mappingLabel.setPos(
@@ -178,17 +173,9 @@ class DigitalInstrumentWidget(QGraphicsView):
 
         self.initMappingLayout()
 
-
-        # self.layout.addLayout(self.boxLayout,0,2)
         self.layout.addLayout(self.boxLayout,0,1)
-        # self.layout.addLayout(self.leftLayout,0,0)
         self.layout.addLayout(self.settingsLayout,0,2)
-        # self.layout.addWidget(scroll, 0,0)
-        # self.layout.addWidget(QPushButton("asdf"), 1,0)
-        button = QPushButton("asdf")
-        button.setVisible(False)
-        self.layout.addWidget(button, 0,2)
-        # self.layout.addWidget(QPushButton("asdf"), 1,3)
+
         self.setLayout(self.layout)
 
         self.initText(scene)
@@ -206,13 +193,18 @@ class DigitalInstrumentWidget(QGraphicsView):
         self.updateUI()
 
     def updateMappingLayout(self):
-    	# TODO: remove old buttons/lables
+
+        for i in range(0, len(self.mappingButtonList)):
+        	self.mappingLabelList[i].hide()
+        	self.mappingButtonList[i].hide()
+        	self.mappingsLayout.removeWidget(self.mappingLabelList[i])
+        	self.mappingsLayout.removeWidget(self.mappingButtonList[i])
+        	self.mappingLabelList[i].deleteLater()
+        	self.mappingButtonList[i].deleteLater()
+        self.mappingButtonList = []
+        self.mappingLabelList = []
 
         customMapping = self.keyboard.customMapping
-        # mappingList = []
-        # buttons = []
-        # labels = []
-
         if customMapping:
         	i = 0
         	for key in customMapping:
@@ -226,57 +218,19 @@ class DigitalInstrumentWidget(QGraphicsView):
 				label = QLabel()
 				label.setText(labelText)
 				label.show()
-				self.mappingsLayout.addWidget(label, i, 1)
+
 				button = QPushButton()
 				button.setText(buttonText)
 				button.show()
-				event = MappingButtonEvent(labelText, customMapping[key])
-				button.clicked.connect(event.event)
-				# button.setEnabled(False)
+
+				button.pressed.connect(partial(self.mappingButtonEvent,
+					notes=customMapping[key]))
+
+				self.mappingsLayout.addWidget(label, i, 1)
 				self.mappingsLayout.addWidget(button, i, 2)
+				self.mappingLabelList.append(label)
+				self.mappingButtonList.append(button)
 
-			# widgets = (self.mappingsLayout.itemAt(i) for i in range(self.mappingsLayout.count()))
-			# # for w in self.mappingsLayout.children():
-			# for w in widgets:
-			# 	# print '\n\nKIDSS'
-			# 	self.mappingsLayout.removeItem(w)
-			# 	if isinstance(w, QLabel):
-			# 		print '\n\n\nwoooooo!!!'
-				# else:
-					# print '\n\n nooo...'
-				# help (w.widget)
-				# help(w)
-				# break
-
-			# print 'buttons:'
-			# print buttons
-			# print mappingList
-			# self.leftLayout.hide()
-			# help(QVBoxLayout())
-
-			# self.initMappingLayout()
-			# self.layout.removeItem(self.leftLayout)
-
-
-
-
-    def getChordMappingString(self):
-    	# TODO: delete all this trash
-        chordMappingString = "Key Mappings:" + '\n'
-
-        customMapping = self.keyboard.customMapping
-        if customMapping:
-            for key in customMapping:
-                chordMappingString += QKeySequence(key).toString() + ': '
-
-                for chord in customMapping[key]:
-                    chordMappingString += "{}, ".format(chord.name)
-
-                chordMappingString += '\n\n'
-
-        else:
-            chordMappingString += "None"
-        return chordMappingString
 
     def updateKeys(self, keys, keyIndices, defaultColor):
         # inverts dict
@@ -290,6 +244,8 @@ class DigitalInstrumentWidget(QGraphicsView):
             else:
                 if self.pressedKeys[keyIndices[i]]:
                     key.setBrush(Qt.gray)
+                elif curNote in self.playingMappingButtonNotes:
+                	key.setBrush(Qt.gray)
                 else:
                     key.setBrush(defaultColor)
 
@@ -298,7 +254,7 @@ class DigitalInstrumentWidget(QGraphicsView):
             key.mappingLabel.setPlainText(QKeySequence(keyMappings[note]).toString())
             for k, v in self.keyboard.customMapping.iteritems():
                 if str(note) in str(v):
-                	# TODO: set text to new mapping when button pressed
+                	# purposfully commented: set text to new mapping when button pressed
                     # key.mappingLabel.setPlainText(QKeySequence(k).toString())
                     break
                 elif keyMappings[note] == k:
@@ -309,7 +265,6 @@ class DigitalInstrumentWidget(QGraphicsView):
         if not hasattr(self, 'pressedKeys') or self.pressedKeys is None:
             self.pressedKeys = [False] * 24
 
-        self.chordMappings.setPlainText(self.getChordMappingString())
         self.updateMappingLayout()
 
         #update octaves seen on screen
@@ -405,21 +360,26 @@ class DigitalInstrumentWidget(QGraphicsView):
         self.keyboard.deleteButton(dialog_output)
 
     def settingsButtonEvent(self):
-    	dropdown_options = ['orange', 'blue'];
+    	dropdown_options = ['orange', 'cyan', 'yellow', 'green'];
     	colors = {
-    		'back&white': constants.orange,
-    		'blue': Qt.blue,
+    		'orange': constants.orange,
+    		'cyan': constants.cyan,
+    		'yellow': constants.yellow,
+    		'green': constants.green,
     	}
     	dialog_output = QInputDialog().getItem(self, 'Settings',
                 'Choose a colorshceme', dropdown_options)
     	constants.highlighted_key_color = colors[dialog_output[0]]
 
-class MappingButtonEvent(DigitalInstrumentWidget):
-	def __init__(self, key, notes):
-		self.key = key
-		self.notes = notes
-
-	def event(self):
-		print 'Hit event\n\n'
-		dialog_output = QInputDialog().getItem(self, 'Mapping Button',
-                key, notes)
+    def mappingButtonEvent(self, notes):
+     	if self.playingMappingButtonNotes:
+     		for note in self.playingMappingButtonNotes:
+		        self.keyboard.endNote(note)
+     		self.playingMappingButtonNotes = []
+     	else:
+     		self.playingMappingButtonNotes = notes
+     		for note in notes:
+     			print "asdfasdfasdf: {}".format(note)
+		        self.keyboard.startNote(note)
+     			
+     	self.updateUI()

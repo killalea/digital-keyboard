@@ -98,4 +98,7 @@ keyboard_types = {
 }
 
 orange = 0xef8a62
+cyan = 0x5ab4ac
+yellow = 0xffffbf
+green = 0x91cf60
 highlighted_key_color = orange

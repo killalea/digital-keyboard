@@ -7,7 +7,6 @@ from interface import DigitalInstrumentWidget
 
 def main():
     fluidsynth.init("HS Synth Collection I.sf2", "alsa")
-    # fluidsynth.init("Nice-Keys.sf2", "alsa")
     app = QApplication(sys.argv)
     DigitalInstrumentWidget()
     sys.exit(app.exec_())

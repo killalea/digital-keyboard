@@ -59,8 +59,9 @@ class Keyboard(object):
         self.sound.set_octave(self.octave)
 
     def startNote(self, note):
-        print(str(note) + " started")
-
+        print("{} started".format(note))
+        # print note
+        print 'note.value: {}'.format(note.value)
         self.sound.play_note(note.value)
 
     def endNote(self, note):
